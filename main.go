@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -52,7 +51,7 @@ func main() {
 	v1Router.Get("/healthz", handlerReadiness)
 	v1Router.Get("/error", handlerErr)
 	v1Router.Post("/user", apiCfg.handlerCreateUser)
-	v1Router.Get("/user", apiCfg.handlerGetUser)
+	v1Router.Get("/user", apiCfg.middlewareAuth(apiCfg.handlerGetUser))
 	router.Mount("/v1", v1Router)
 
 	server := &http.Server{
@@ -60,7 +59,7 @@ func main() {
 		Addr:    ":" + portString,
 	}
 
-	fmt.Printf("Server starting on port %v\n", portString)
+	log.Printf("Server starting on port %v\n", portString)
 
 	err = server.ListenAndServe()
 
