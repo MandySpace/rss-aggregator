@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/MandySpace/rss-aggregator/internal/database"
 	"github.com/google/uuid"
-	"github.com/mandySpace/rss-aggregator/internal/database"
 )
 
 func (apiCfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Request) {
@@ -19,7 +19,7 @@ func (apiCfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Reques
 	params := parameters{}
 	err := decoder.Decode(&params)
 	if err != nil {
-		respondWithError(w, 400, fmt.Sprintf("Error parsing JSON: ", err))
+		respondWithError(w, 400, fmt.Sprintf("Error parsing JSON: %s", err))
 		return
 	}
 
@@ -31,8 +31,8 @@ func (apiCfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Reques
 	})
 
 	if err != nil {
-		respondWithError(w, 400, fmt.Sprintf("Couldn't create user: ", err))
+		respondWithError(w, 400, fmt.Sprintf("Couldn't create user: %s", err))
 	}
 
-	respondWithJSON(w, 200, user)
+	respondWithJSON(w, 201, databaseUserToUser(user))
 }

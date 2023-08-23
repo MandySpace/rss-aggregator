@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/MandySpace/rss-aggregator/internal/database"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
-	"github.com/mandySpace/rss-aggregator/internal/database"
 
 	_ "github.com/lib/pq"
 )
@@ -61,7 +61,7 @@ func main() {
 
 	fmt.Printf("Server starting on port %v\n", portString)
 
-	err := server.ListenAndServe()
+	err = server.ListenAndServe()
 
 	if err != nil {
 		log.Fatal(err)
