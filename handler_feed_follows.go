@@ -1,0 +1,54 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"time"
+
+	"github.com/MandySpace/rss-aggregator/internal/database"
+	"github.com/google/uuid"
+)
+
+func (apiCfg *apiConfig) handlerCreateFeedFollow(w http.ResponseWriter, r *http.Request, user database.User) {
+	type parameters struct {
+		FeedId uuid.UUID `json:"feed_id"`
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	params := parameters{}
+	err := decoder.Decode(&params)
+	if err != nil {
+		respondWithError(w, 400, fmt.Sprintf("Error parsing JSON: %s", err))
+		return
+	}
+
+	feedFollow, err := apiCfg.DB.CreateFeedFollow(r.Context(), database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		FeedID:    params.FeedId,
+		UserID:    user.ID,
+	})
+
+	if err != nil {
+		respondWithError(w, 400, fmt.Sprintf("Couldn't follow feed: %s", err))
+		return
+	}
+
+	respondWithJSON(w, 201, databaseFeedFollowToFeedFollow(feedFollow))
+
+}
+
+func (apiCfg *apiConfig) handlerGetFeedFollows(w http.ResponseWriter, r *http.Request, user database.User) {
+
+	feedFollows, err := apiCfg.DB.GetFeedFollows(r.Context(), user.ID)
+
+	if err != nil {
+		respondWithError(w, 400, fmt.Sprintf("Couldn't get followed feeds: %s", err))
+		return
+	}
+
+	respondWithJSON(w, 201, databaseFeedFollowsToFeedFollows(feedFollows))
+
+}
