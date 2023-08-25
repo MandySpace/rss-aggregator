@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"strings"
 	"sync"
 	"time"
 
@@ -49,8 +50,6 @@ func scrapeFeed(db *database.Queries, feed database.Feed, wg *sync.WaitGroup) {
 	}
 
 	for _, item := range rssFeed.Channel.Item {
-		log.Println("Found post: ", item.Title, " on feed ", feed.Name)
-
 		description := sql.NullString{}
 
 		if item.Description != "" {
@@ -70,11 +69,14 @@ func scrapeFeed(db *database.Queries, feed database.Feed, wg *sync.WaitGroup) {
 			UpdatedAt:   time.Now(),
 			Title:       item.Title,
 			Description: description,
-			Url:         feed.Url,
+			Url:         item.Link,
 			PublishedAt: pubAt,
 			FeedID:      feed.ID,
 		})
 		if err != nil {
+			if strings.Contains(err.Error(), "duplicate key") {
+				continue
+			}
 			log.Printf("Failed to create post: %v", err)
 		}
 	}
